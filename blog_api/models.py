@@ -2,8 +2,17 @@ from django.db import models
 import datetime
 from django.contrib.auth.models import AbstractUser
 from ckeditor.fields import RichTextField
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from rest_framework.authtoken.models import Token
+from django.conf import settings
 
 class UserProfiles(AbstractUser):
+
+    @receiver(post_save, sender=settings.AUTH_USER_MODEL)
+    def create_auth_token(sender, instance=None, created = False, **kwargs):
+        if created:
+            Token.objects.create(user = instance)
 
 
     class Meta:
@@ -12,10 +21,10 @@ class UserProfiles(AbstractUser):
 
 
 class Recipe(models.Model):
-    recipe_name= models.CharField( max_length=25, null=True, blank=True)
-    recipe_image= models.FileField(null=True,blank=True)
-    category=models.CharField( max_length= 25, null=True, blank=True )
-    type=models.CharField(max_length=30, null=True, blank=True)
+    recipe_name = models.CharField( max_length=25, null=True, blank=True)
+    recipe_image = models.FileField(null=True,blank=True)
+    category = models.CharField( max_length= 25, null=True, blank=True )
+    type = models.CharField(max_length=30, null=True, blank=True)
     step = RichTextField(null= True)
     pub_date = models.DateField(default=datetime.datetime.now, null=True, blank=True)
     prep_time = models.CharField(max_length=25, null=True, blank=True)

@@ -40,10 +40,18 @@ INSTALLED_APPS = [
     'blog_api',
     'rest_framework',
     'rest_framework.authtoken',
-    'rest_auth'
+
 
 
 ]
+
+REST_FRAMEWORK = {
+   'DEFAULT_AUTHENTICATION_CLASSES': (
+       'rest_framework.authentication.TokenAuthentication',
+   ),
+
+}
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
