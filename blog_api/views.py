@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse,Http404
 import json
-from .models import UserProfiles, Recipe, Slider
-from . serializers import UserProfilesSerializers,LoginSerializers
+from .models import UserProfiles, Recipe, Slider, Recipe, Ingredients, Feature, FooterImage, Contact, SocialLinks, Newsletter, Address
+from . serializers import UserProfilesSerializers,LoginSerializers, ContactSerializers, RecipeSerializers, IngredientSerializers, SliderSerializers, SocialLinksSerializers, FooterImageSerializers, FeatureSerializers, NewsletterSerializers,AddressSerializers
 from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -42,6 +42,7 @@ class LoginView(viewsets.ViewSet):
         serializer_class = LoginSerializers
 
         def create(self, request):
+
             serializer = self.serializer_class(data=request.data)
             serializer.is_valid(raise_exception=True)
             username = serializer.data.get('username')
@@ -54,6 +55,81 @@ class LoginView(viewsets.ViewSet):
                return Response({'success':True, 'message':'successful','token':token.key})
             else:
                 return Response({'success':False, 'message':'login unsuccessful'})
+
+
+
+class ContactView(viewsets.ViewSet):
+
+    serializer_class = ContactSerializers
+
+    def create(self, request):
+
+        serializer = self.serializer_class(data = request.data)
+        serializer.is_valid(raise_exception = True)
+        contact_name = serializer.data.get('contact_name')
+        contact_email = serializer.data.get('contact_email')
+        contact_msg = serializer.data.get('contact_msg')
+        contact_subject = serializer.data.get('contact_subject')
+        contact = Contact(contact_name = contact_name, contact_email = contact_email, contact_msg = contact_msg, contact_subject = contact_subject)
+        contact.save()
+        return Response({'sucess':True, 'message': 'message submitted'})
+
+
+class RecipeView(viewsets.ModelViewSet):
+
+   queryset = Recipe.objects.all()
+   serializer_class = RecipeSerializers
+
+
+class SliderView(viewsets.ModelViewSet):
+
+    queryset = Slider.objects.all()
+    serializer_class = SliderSerializers
+
+
+class SocialLinkView(viewsets.ModelViewSet):
+
+    queryset = SocialLinks.objects.all()
+    serializer_class = SocialLinksSerializers
+
+
+class FooterImageView(viewsets.ModelViewSet):
+
+    queryset = FooterImage.objects.all()
+    serializer_class = FooterImageSerializers
+
+
+class FeatureView(viewsets.ModelViewSet):
+
+    queryset = Feature.objects.all()
+    serializer_class = FeatureSerializers
+
+
+class NewsletterView(viewsets.ModelViewSet):
+
+    serializer_class = NewsletterSerializers
+
+    def create(self, request):
+
+        serializer = self.serializer_class(data = request.data)
+        serializer.is_valid(raise_exception = True)
+        mail = serializer.data.get('mail')
+        newsletter = Newsletter(mail = mail)
+        newsletter.save()
+        return Response({'sucsess':True, 'message': 'subscribed'})
+
+class AddressView(viewsets.ModelViewSet):
+
+    queryset = Address.objects.all()
+    serializer_class = AddressSerializers
+
+
+
+
+
+
+
+
 
 
 

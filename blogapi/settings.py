@@ -40,10 +40,15 @@ INSTALLED_APPS = [
     'blog_api',
     'rest_framework',
     'rest_framework.authtoken',
+    'ckeditor',
+    'phone_field'
 
 
 
 ]
+
+
+STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
 REST_FRAMEWORK = {
    'DEFAULT_AUTHENTICATION_CLASSES': (
