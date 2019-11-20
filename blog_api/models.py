@@ -34,6 +34,7 @@ class Ingredients(models.Model):
 
 
 class Recipe(models.Model):
+
     recipe_name = models.CharField( max_length=25, null=True, blank=True)
     ingredients = models.ManyToManyField(Ingredients, max_length=25, default="0")
     recipe_image = models.FileField(null=True,blank=True)
@@ -130,8 +131,8 @@ class Comments(models.Model):
     name= models.CharField(max_length= 25, null=True, blank=True)
     subject= models.CharField(max_length= 25, null=True, blank=True)
     msg= models.TextField(max_length=255, null=True, blank=True)
-    email= models.EmailField(max_length= 25, null= True,  blank=True)
     date = models.DateTimeField(auto_now_add=True , blank = True, null = True)
+
 
 
     class Meta:
@@ -164,11 +165,12 @@ class Newsletter(models.Model):
 
 class Rating(models.Model):
 
-    rating = models.IntegerField(blank=True, null=True)
+    name = models.CharField(max_length = 255, blank = True, null = True)
+    rate = models.IntegerField(blank=True, null=True)
     avg = models.IntegerField(null=True, blank=True)
     total = models.IntegerField(null=True, blank=True)
-    recipename = models.ForeignKey(Recipe, on_delete = models.CASCADE, related_name ='rname', null=True, blank=True)
-    recipeimage = models.ForeignKey(Recipe, on_delete = models.CASCADE, related_name = 'rimage', null = True, blank = True)
+    recipename = models.CharField(max_length = 255, null=True, blank=True)
+    recipeimage = models.FileField(null = True, blank = True)
 
     class Meta:
         db_table = "rating"

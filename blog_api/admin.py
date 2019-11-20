@@ -52,13 +52,20 @@ class AddressAdmin(admin.ModelAdmin):
 
 class CommentsAdmin(admin.ModelAdmin):
 
-    list_display = ('receipe_name', 'name', 'subject', 'msg', 'email', 'date')
+    list_display = ('receipe_name', 'name', 'subject', 'msg', 'date')
+
+
+class ContactAdmin(admin.ModelAdmin):
+
+    list_display = ('contact_name', 'contact_subject', 'contact_msg', 'contact_email')
 
 
 class RatingAdmin(admin.ModelAdmin):
 
-    list_display =('rating', 'avg', 'total')
+    list_display =('rate', 'avg', 'total' , 'recipename', 'recipeimage', 'name')
 
+
+admin.site.register(Contact, ContactAdmin)
 admin.site.register(Comments, CommentsAdmin)
 admin.site.register(Rating, RatingAdmin)
 admin.site.register(Address, AddressAdmin)

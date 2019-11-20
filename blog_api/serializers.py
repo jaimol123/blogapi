@@ -1,6 +1,6 @@
 from rest_framework import serializers
 import datetime
-from .models import UserProfiles, Recipe, Slider, SocialLinks, FooterImage, Feature, Contact, Ingredients,AboutUs,Newsletter,Address
+from .models import UserProfiles, Recipe, Slider, SocialLinks, FooterImage, Feature, Contact, Ingredients,AboutUs,Newsletter,Address,Comments, Rating
 
 
 class UserProfilesSerializers(serializers.ModelSerializer):
@@ -52,7 +52,7 @@ class LoginSerializers(serializers.ModelSerializer):
 
 class IngredientSerializers(serializers.ModelSerializer):
 
-    ingredients = serializers.CharField(max_length = 255, required = True)
+    ingredients = serializers.CharField()
 
     class Meta:
         model = Ingredients
@@ -63,17 +63,28 @@ class RecipeSerializers(serializers.ModelSerializer):
 
     recipe_name = serializers.CharField(max_length = 255, required = True)
     ingredients = IngredientSerializers(many = True)
-    recipe_image = serializers.FileField(max_length = 255, required = True)
     category = serializers.CharField(max_length = 255, required = True)
     type = serializers.CharField(max_length = 255, required = True)
-    #step = serializers.RichTextField()
-    prep_time = serializers.CharField(max_length = 255, required = True)
 
 
     class Meta:
 
         model = Recipe
-        fields = ('recipe_name' , 'recipe_image', 'category', 'type', 'step', 'prep_time', 'ingredients')
+        fields ='__all__'
+
+
+class RecipePostSerializers(serializers.ModelSerializer):
+
+     recipe_name = serializers.CharField(max_length=255, required=True)
+     category = serializers.CharField(max_length=255, required=True)
+     type = serializers.CharField(max_length=255, required=True)
+
+
+     class Meta:
+
+        model = Recipe
+        fields = ('recipe_name','category', 'type')
+
 
 
 class SliderSerializers(serializers.ModelSerializer):
@@ -160,7 +171,7 @@ class NewsletterSerializers(serializers.ModelSerializer):
 
 class AddressSerializers(serializers.ModelSerializer):
 
-    Address = serializers
+    Address = serializers.CharField(max_length=255, required=True)
     phone_number = serializers.CharField(max_length = 255, required = True)
     email = serializers.EmailField(required = True)
     heading1 = serializers.CharField(max_length = 255, required = True)
@@ -170,6 +181,40 @@ class AddressSerializers(serializers.ModelSerializer):
     class Meta:
         model = Address
         fields = '__all__'
+
+
+class CommentSerializers(serializers.ModelSerializer):
+
+    subject = serializers.CharField(max_length = 255, required = True)
+    msg = serializers.CharField(max_length = 255, required = True)
+    receipe_name = serializers.IntegerField( required = True)
+
+
+    class Meta:
+
+        model = Comments
+        fields = ('subject', 'msg', 'receipe_name')
+
+
+class CommentlistSerializers(serializers.ModelSerializer):
+
+    recipe_name = serializers.StringRelatedField()
+
+    class Meta:
+
+        model = Comments
+        fields = '__all__'
+
+
+class RatingSerializers(serializers.ModelSerializer):
+
+    rate = serializers.IntegerField(required = True)
+    recipe_name = serializers.CharField(required = True, max_length = 255)
+
+    class Meta:
+        model = Rating
+        fields =('rate', 'recipe_name' )
+
 
 
 
