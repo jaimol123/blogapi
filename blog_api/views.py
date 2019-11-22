@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse,Http404
 import json
 from .models import UserProfiles, Recipe, Slider, Recipe, Ingredients, Feature, FooterImage, Contact, SocialLinks, Newsletter, Address, Comments, Rating
-from . serializers import UserProfilesSerializers,LoginSerializers, ContactSerializers, RecipeSerializers, IngredientSerializers, SliderSerializers, SocialLinksSerializers, FooterImageSerializers, FeatureSerializers, NewsletterSerializers,AddressSerializers,CommentSerializers,RatingSerializers,RecipePostSerializers,CommentlistSerializers
+from . serializers import UserProfilesSerializers,LoginSerializers, ContactSerializers, RecipeSerializers, IngredientSerializers, SliderSerializers, SocialLinksSerializers, FooterImageSerializers, FeatureSerializers, NewsletterSerializers,AddressSerializers,CommentSerializers,RatingSerializers,RecipePostSerializers,CommentlistSerializers,CommentUpdateSerializers
 from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -75,9 +75,9 @@ class LoginView(viewsets.ViewSet):
 
 class ContactView(viewsets.ViewSet):
 
-    serializer_class = ContactSerializers
+     serializer_class = ContactSerializers
 
-    def create(self, request):
+     def create(self, request):
 
         serializer = self.serializer_class(data = request.data)
         serializer.is_valid(raise_exception = True)
@@ -90,11 +90,14 @@ class ContactView(viewsets.ViewSet):
         return Response({'sucess':True, 'message': 'message submitted'})
 
 
+
+
+
 class RecipeView(viewsets.ModelViewSet):
 
    queryset = Recipe.objects.all()
+   permission_classes = [IsAuthenticated]
    serializer_class = RecipeSerializers
-
 
 
 
@@ -103,36 +106,54 @@ class RecipePostView(viewsets.ModelViewSet):
     serializer_class = RecipePostSerializers
 
     def create(self, request):
+
+        recipe_dict ={}
+        recipe_list = []
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         recipe_name = serializer.data.get('recipe_name')
+        print(recipe_name)
         type = serializer.data.get('type')
         category = serializer.data.get('category')
-        recipe = Recipe.objects.filter(Q(category__contains=category)).filter(Q(type__contains=type)).filter(Q(recipe_name__contains=recipe_name))
-        return Response({'success': True, 'data' : str(recipe)})
+
+        recipe = Recipe.objects.filter(Q(category__contains=category)| Q(type__contains=type) | Q(recipe_name__contains=recipe_name))
+        print("query-----", recipe)
+        for data in recipe:
+
+            recipe_dict['name'] = data.recipe_name
+            recipe_dict['image'] = data.recipe_image
+            print(recipe_dict)
+            recipe_list.append(recipe_dict['name'])
+            recipe_list.append(recipe_dict['image'])
+
+        return Response({'data' : str(recipe_list)})
 
 
 class SliderView(viewsets.ModelViewSet):
 
     queryset = Slider.objects.all()
+    permission_classes = [IsAuthenticated]
     serializer_class = SliderSerializers
 
 
 class SocialLinkView(viewsets.ModelViewSet):
 
     queryset = SocialLinks.objects.all()
+    permission_classes = [IsAuthenticated]
     serializer_class = SocialLinksSerializers
 
 
 class FooterImageView(viewsets.ModelViewSet):
 
     queryset = FooterImage.objects.all()
+    permission_classes = [IsAuthenticated]
     serializer_class = FooterImageSerializers
 
 
 class FeatureView(viewsets.ModelViewSet):
 
     queryset = Feature.objects.all()
+    permission_classes = [IsAuthenticated]
     serializer_class = FeatureSerializers
 
 
@@ -152,6 +173,7 @@ class NewsletterView(viewsets.ModelViewSet):
 class AddressView(viewsets.ModelViewSet):
 
     queryset = Address.objects.all()
+    permission_classes = [IsAuthenticated]
     serializer_class = AddressSerializers
 
 
@@ -173,11 +195,41 @@ class CommentsView(viewsets.ModelViewSet):
         return Response({'sucess': True, 'message': 'submitted'})
 
 
+
+
 class CommentListView(viewsets.ModelViewSet):
 
     queryset = Comments.objects.all()
     serializer_class = CommentlistSerializers
+    permission_classes = [IsAuthenticated]
 
+
+class CommentUpdateView(viewsets.ModelViewSet):
+
+      serializer_class = CommentUpdateSerializers
+
+      def partial_update(self, request, pk):
+            serializer = self.serializer_class(data = request.data)
+            serializer.is_valid(raise_exception = True)
+            id = serializer.data.get('id')
+            name = self.request.user.username
+            msg = serializer.data.get('msg')
+            subject = serializer.data.get('subject')
+            comment_update = Comments.objects.get(id = id)
+            comment_update.msg = msg
+            comment_update.subject = subject
+            comment_update.save()
+            return Response({'success': True, 'message': 'updated'})
+
+
+      def delete(self, request , pk):
+
+            serializer = self.serializer_class(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            id = serializer.data.get('id')
+            comment_delete = Comments.objects.get(id=id)
+            comment_delete.delete()
+            return Response({'success': True, 'message' : 'deleted'})
 
 
 

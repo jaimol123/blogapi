@@ -43,7 +43,6 @@ class LoginSerializers(serializers.ModelSerializer):
     username = serializers.CharField(max_length = 255, required=True)
     password = serializers.CharField(max_length = 255, required = True)
 
-
     class Meta:
 
         model = UserProfiles
@@ -73,17 +72,13 @@ class RecipeSerializers(serializers.ModelSerializer):
         fields ='__all__'
 
 
-class RecipePostSerializers(serializers.ModelSerializer):
+class RecipePostSerializers(serializers.Serializer):
 
-     recipe_name = serializers.CharField(max_length=255, required=True)
-     category = serializers.CharField(max_length=255, required=True)
-     type = serializers.CharField(max_length=255, required=True)
+     recipe_name = serializers.CharField(required = False, allow_null = True,  default = "0")
+     category = serializers.CharField(required = False, allow_null = True, default = "0" )
+     type = serializers.CharField(required = False, allow_null = True, default = "0")
 
 
-     class Meta:
-
-        model = Recipe
-        fields = ('recipe_name','category', 'type')
 
 
 
@@ -150,10 +145,13 @@ class ContactSerializers(serializers.ModelSerializer):
     contact_message = serializers.CharField(max_length = 255, required = True)
     contact_email = serializers.EmailField(required = True)
 
+
+
     class Meta:
 
         model = Contact
         fields = ('contact_name','contact_subject', 'contact_message', 'contact_email')
+
 
 
 class NewsletterSerializers(serializers.ModelSerializer):
@@ -162,7 +160,7 @@ class NewsletterSerializers(serializers.ModelSerializer):
 
     def validate_mail(self, data):
         if('@' not in data):
-            raise serializers.ValidationError('invalid mail id')
+            raise serializers.ValidationError('invalid mail')
         return data
 
     class Meta:
@@ -189,21 +187,37 @@ class CommentSerializers(serializers.ModelSerializer):
     msg = serializers.CharField(max_length = 255, required = True)
     receipe_name = serializers.IntegerField( required = True)
 
-
     class Meta:
 
         model = Comments
-        fields = ('subject', 'msg', 'receipe_name')
+        fields = "__all__"
+
 
 
 class CommentlistSerializers(serializers.ModelSerializer):
 
-    recipe_name = serializers.StringRelatedField()
+    id = serializers.IntegerField()
+    name  = serializers.CharField()
+    subject = serializers.CharField(max_length = 255, required = True)
+    msg = serializers.CharField(max_length = 255, required = True)
+    receipe_name = RecipeSerializers()
 
     class Meta:
-
         model = Comments
-        fields = '__all__'
+        fields = "__all__"
+
+
+class CommentUpdateSerializers(serializers.ModelSerializer):
+
+    id = serializers.IntegerField()
+    name = serializers.CharField(required = True)
+    subject = serializers.CharField(required = True)
+    msg = serializers.CharField(required = True)
+    receipe_name = serializers.CharField(required = True)
+
+    class Meta:
+        model = Comments
+        fields = "__all__"
 
 
 class RatingSerializers(serializers.ModelSerializer):

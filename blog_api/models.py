@@ -127,7 +127,7 @@ class Contact(models.Model):
 
 class Comments(models.Model):
 
-    receipe_name = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name="water", null=True, blank=True)
+    receipe_name = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name="comment_recipename", null=True, blank=True)
     name= models.CharField(max_length= 25, null=True, blank=True)
     subject= models.CharField(max_length= 25, null=True, blank=True)
     msg= models.TextField(max_length=255, null=True, blank=True)
@@ -151,7 +151,7 @@ class Address(models.Model):
 
     class Meta:
         db_table = "details"
-        verbose_name = "Details"
+        verbose_name = "Detail"
 
 
 class Newsletter(models.Model):
