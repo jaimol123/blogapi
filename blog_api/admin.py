@@ -62,7 +62,7 @@ class ContactAdmin(admin.ModelAdmin):
 
 class RatingAdmin(admin.ModelAdmin):
 
-    list_display =('rate', 'avg', 'total' , 'recipename', 'recipeimage', 'name')
+    list_display =('rate', 'avg', 'total' , 'recipename', 'name')
 
 
 admin.site.register(Contact, ContactAdmin)

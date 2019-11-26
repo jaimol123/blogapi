@@ -49,6 +49,11 @@ class LoginSerializers(serializers.ModelSerializer):
         fields = ('username', 'password')
 
 
+class LogoutSerializers(serializers.Serializer):
+
+    user_id = serializers.IntegerField()
+
+
 class IngredientSerializers(serializers.ModelSerializer):
 
     ingredients = serializers.CharField()
@@ -185,7 +190,7 @@ class CommentSerializers(serializers.ModelSerializer):
 
     subject = serializers.CharField(max_length = 255, required = True)
     msg = serializers.CharField(max_length = 255, required = True)
-    receipe_name = serializers.IntegerField( required = True)
+    receipe_name_id = serializers.IntegerField( required = True)
 
     class Meta:
 
@@ -227,7 +232,20 @@ class RatingSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = Rating
-        fields =('rate', 'recipe_name' )
+        fields =('rate', 'recipe_name')
+
+
+class RatingListSerializers(serializers.Serializer):
+
+    recipename = serializers.CharField()
+    rate = serializers.IntegerField()
+    avg = serializers.IntegerField()
+
+
+class SocialLoginSerializer(serializers.Serializer):
+
+    provider = serializers.CharField(max_length=255, required=True)
+    access_token = serializers.CharField(max_length=4096, required=True, trim_whitespace=True)
 
 
 

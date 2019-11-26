@@ -2,29 +2,30 @@ from django.shortcuts import render
 from django.http import HttpResponse,Http404
 import json
 from .models import UserProfiles, Recipe, Slider, Recipe, Ingredients, Feature, FooterImage, Contact, SocialLinks, Newsletter, Address, Comments, Rating
-from . serializers import UserProfilesSerializers,LoginSerializers, ContactSerializers, RecipeSerializers, IngredientSerializers, SliderSerializers, SocialLinksSerializers, FooterImageSerializers, FeatureSerializers, NewsletterSerializers,AddressSerializers,CommentSerializers,RatingSerializers,RecipePostSerializers,CommentlistSerializers,CommentUpdateSerializers
+from . serializers import UserProfilesSerializers,LoginSerializers, ContactSerializers, RecipeSerializers, IngredientSerializers, SliderSerializers, SocialLinksSerializers, FooterImageSerializers, FeatureSerializers, NewsletterSerializers,AddressSerializers,CommentSerializers,RatingSerializers,RecipePostSerializers,CommentlistSerializers,CommentUpdateSerializers,RatingListSerializers,LogoutSerializers,SocialLoginSerializer
 from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-#from rest_framework.generics import GenricAPIView
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, logout
 from django.db.models import Q
 import math
 import json
+from requests.exceptions import HTTPError
+from social_django.utils import load_strategy, load_backend
+from social_core.backends.oauth import BaseOAuth2
+from social_core.exceptions import MissingBackend, AuthTokenError, AuthForbidden
 
 
 class HomeView(viewsets.ModelViewSet):
 
         queryset = UserProfiles.objects.all()
         serializer_class = UserProfilesSerializers
-
-
 
         def create(self, request):
 
@@ -36,19 +37,6 @@ class HomeView(viewsets.ModelViewSet):
            user.set_password(serializer.data.get('password'))
            user.save()
            return Response({'success':True,'message':"signup done"})
-
-        def update(self, request):
-                instance = self.get_object()
-                instance.first_name = request.data.get('first_name')
-                instance.save()
-                serializer = self.serializer_class(instance)
-                serializer.is_valid(raise_exception = True)
-                self.perform_update(serializer)
-                return Response(serializer.data)
-
-        def perform_update(self, instance):
-            instance.update()
-
 
 
 class LoginView(viewsets.ViewSet):
@@ -70,6 +58,88 @@ class LoginView(viewsets.ViewSet):
                return Response({'success':True, 'message':'successful','token':token.key})
             else:
                 return Response({'success':False, 'message':'login unsuccessful'})
+
+
+class SocialLoginView(viewsets.ModelViewSet):
+
+    serializer_class = SocialLoginSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request):
+
+        serializer = self.serializer_class(data = request.data)
+        serializer.is_valid(raise_exception  =  True)
+        provider = serializer.data.get('provider')
+        strategy = load_strategy(request)
+        try :
+            backend = load_backend(strategy = strategy , name = provider, redirect_uri =None)
+        except MissingBackend:
+            return Response('please provide a valid provider')
+            status = status.HTTP_404_BAD_REQUEST
+
+
+        try:
+            if isinstance(backend, BaseOAuth2):
+                access_token = serializer.data.get('access_token')
+            user = backend.do_auth(access_token)
+        except HTTPError as error:
+            return Response({
+                "error": {
+                    "access_token": "Invalid token",
+                    "details": str(error)
+                }
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except AuthTokenError as error:
+            return Response({
+                "error": "Invalid credentials",
+                "details": str(error)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            authenticated_user = backend.do_auth(access_token, user=user)
+
+        except HTTPError as error:
+            return Response({
+                "error": "invalid token",
+                "details": str(error)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        except AuthForbidden as error:
+            return Response({
+                "error": "invalid token",
+                "details": str(error)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        if authenticated_user and authenticated_user.is_active:
+            # generate JWT token
+            login(request, authenticated_user)
+            data = {
+                "token": jwt_encode_handler(
+                    jwt_payload_handler(user)
+                )}
+            # customize the response to your needs
+            response = {
+                "email": authenticated_user.email,
+                "username": authenticated_user.username,
+                "token": data.get('token')
+            }
+            return Response(status=status.HTTP_200_OK, data=response)
+
+
+class LogoutView(viewsets.ModelViewSet):
+
+    model = Token
+    serializer_class =  LogoutSerializers
+
+
+    def get_queryset(self):
+
+        name = self.request.user
+        print("---------",name)
+        queryset = Token.objects.get(user = name)
+        print("----------->>>",queryset)
+        #self.request.user.token.key.delete()
+        return queryset.key
 
 
 
@@ -188,7 +258,7 @@ class CommentsView(viewsets.ModelViewSet):
         user = self.request.user
         msg = serializer.data.get('msg')
         subject = serializer.data.get('subject')
-        recipename =serializer.data.get('receipe_name')
+        recipename =serializer.data.get('receipe_name_id')
         print("----------", recipename)
         comment = Comments(name = user, msg = msg, subject = subject, receipe_name_id = recipename)
         comment.save()
@@ -206,6 +276,7 @@ class CommentListView(viewsets.ModelViewSet):
 
 class CommentUpdateView(viewsets.ModelViewSet):
 
+      http_method_names = ['patch' ,  'delete']
       serializer_class = CommentUpdateSerializers
 
       def partial_update(self, request, pk):
@@ -231,7 +302,10 @@ class CommentUpdateView(viewsets.ModelViewSet):
             comment_delete.delete()
             return Response({'success': True, 'message' : 'deleted'})
 
+class RatingListView(viewsets.ModelViewSet):
 
+    queryset = Rating.objects.values('recipename', 'rate' , 'avg' ).distinct()
+    serializer_class = RatingListSerializers
 
 
 class RatingView(viewsets.ModelViewSet):
@@ -252,12 +326,12 @@ class RatingView(viewsets.ModelViewSet):
         count = Rating.objects.filter(recipename = recipename).count()
         if(count < 1):
             print("inside 1")
-            rate = Rating(rate = rating, recipename = recipename, recipeimage = rimg, name = name)
+            rate = Rating(rate = rating, recipename = recipename,  name = name, avg = rating, total = rating)
             rate.save()
         elif(count >= 1):
             print("inside 2")
 
-            rate_insert = Rating(rate = rating, recipename = recipename, recipeimage = rimg , name = name )
+            rate_insert = Rating(rate = rating, recipename = recipename,  name = name )
             rate_insert.save()
             count1 = Rating.objects.filter(recipename=recipename).count()
             print(count1)
@@ -265,11 +339,14 @@ class RatingView(viewsets.ModelViewSet):
             for i in r:
                 rate_sum = rate_sum + int(i.rate)
                 average = rate_sum/count1
-            print("values-----------",rate_sum, average)
-            Rating.objects.filter(recipename = recipename).update(avg = average)
-            Rating.objects.filter(recipename=recipename).update(total = rate_sum)
+
+                Rating.objects.filter(recipename = recipename).update(avg = average)
+                Rating.objects.filter(recipename = recipename).update(total = rate_sum)
+                Rating.objects.filter(recipename = recipename).update(recipename = recipename)
 
         return Response({'success': True, 'message' : 'rating done'})
+
+
 
 
 

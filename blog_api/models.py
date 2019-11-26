@@ -170,7 +170,7 @@ class Rating(models.Model):
     avg = models.IntegerField(null=True, blank=True)
     total = models.IntegerField(null=True, blank=True)
     recipename = models.CharField(max_length = 255, null=True, blank=True)
-    recipeimage = models.FileField(null = True, blank = True)
+  
 
     class Meta:
         db_table = "rating"
