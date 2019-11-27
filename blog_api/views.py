@@ -271,7 +271,7 @@ class CommentListView(viewsets.ModelViewSet):
 
     queryset = Comments.objects.all()
     serializer_class = CommentlistSerializers
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
 
 class CommentUpdateView(viewsets.ModelViewSet):
