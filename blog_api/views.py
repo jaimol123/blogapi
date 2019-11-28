@@ -166,7 +166,7 @@ class ContactView(viewsets.ViewSet):
 class RecipeView(viewsets.ModelViewSet):
 
    queryset = Recipe.objects.all()
-   permission_classes = [IsAuthenticated]
+   permission_classes = [AllowAny]
    serializer_class = RecipeSerializers
 
 
@@ -174,6 +174,7 @@ class RecipeView(viewsets.ModelViewSet):
 class RecipePostView(viewsets.ModelViewSet):
 
     serializer_class = RecipePostSerializers
+    permission_classes = [AllowAny]
 
     def create(self, request):
 
@@ -202,34 +203,35 @@ class RecipePostView(viewsets.ModelViewSet):
 class SliderView(viewsets.ModelViewSet):
 
     queryset = Slider.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = SliderSerializers
 
 
 class SocialLinkView(viewsets.ModelViewSet):
 
     queryset = SocialLinks.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = SocialLinksSerializers
 
 
 class FooterImageView(viewsets.ModelViewSet):
 
     queryset = FooterImage.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = FooterImageSerializers
 
 
 class FeatureView(viewsets.ModelViewSet):
 
     queryset = Feature.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = FeatureSerializers
 
 
 class NewsletterView(viewsets.ModelViewSet):
 
     serializer_class = NewsletterSerializers
+    permission_classes = [AllowAny]
 
     def create(self, request):
 
@@ -243,13 +245,14 @@ class NewsletterView(viewsets.ModelViewSet):
 class AddressView(viewsets.ModelViewSet):
 
     queryset = Address.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = AddressSerializers
 
 
 class CommentsView(viewsets.ModelViewSet):
 
     serializer_class = CommentSerializers
+    permission_classes = [IsAuthenticated]
 
     def create(self, request):
 
@@ -271,7 +274,8 @@ class CommentListView(viewsets.ModelViewSet):
 
     queryset = Comments.objects.all()
     serializer_class = CommentlistSerializers
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+
 
 
 class CommentUpdateView(viewsets.ModelViewSet):
@@ -306,11 +310,13 @@ class RatingListView(viewsets.ModelViewSet):
 
     queryset = Rating.objects.values('recipename', 'rate' , 'avg' ).distinct()
     serializer_class = RatingListSerializers
+    permission_classes = [AllowAny]
 
 
 class RatingView(viewsets.ModelViewSet):
 
     serializer_class = RatingSerializers
+    permission_classes = [AllowAny]
 
 
     def create(self, request):

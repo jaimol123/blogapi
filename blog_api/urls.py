@@ -5,12 +5,12 @@ from . views import HomeView, LoginView, ContactView, RecipeView,  SliderView, S
 from . import views
 
 router = routers.DefaultRouter()
-router.register(r'rate-list-view' , RatingListView , basename = 'recipe-list'),
+router.register(r'rate-list' , RatingListView , basename = 'recipe-list'),
 router.register(r'rate-post' , RatingView , basename = 'rating'),
 
 router.register(r'comment-update' , CommentUpdateView, basename = 'comment_update'),
 router.register(r'comment-list', CommentListView, basename = 'comment_list'),
-router.register(r'comment-post', CommentsView, basename = 'comment'),
+router.register(r'comment-post', CommentsView, basename = 'comment-post'),
 
 router.register(r'recipe-post', RecipePostView , basename = 'recipe_post'),
 router.register(r'recipe-list', RecipeView, basename = 'recipe')
