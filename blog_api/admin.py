@@ -1,5 +1,5 @@
 from django.contrib import admin
-from . models import UserProfiles,Recipe,Ingredients,Feature,FooterImage,SocialLinks,Slider,AboutUs
+from . models import UserProfiles,Recipe,Ingredients,Feature,FooterImage,SocialLinks,Slider,AboutUs, Address, Newsletter, Rating,Contact,Comments
 
 
 class UserProfilesAdmin(admin.ModelAdmin):
@@ -44,6 +44,31 @@ class FooterAdmin(admin.ModelAdmin):
 
     list_display = ('image',)
 
+
+class AddressAdmin(admin.ModelAdmin):
+
+   list_display = ('address', 'phone_number', 'heading1', 'heading2', 'heading3')
+
+
+class CommentsAdmin(admin.ModelAdmin):
+
+    list_display = ('receipe_name', 'name', 'subject', 'msg', 'date')
+
+
+class ContactAdmin(admin.ModelAdmin):
+
+    list_display = ('contact_name', 'contact_subject', 'contact_msg', 'contact_email')
+
+
+class RatingAdmin(admin.ModelAdmin):
+
+    list_display =('rate', 'avg', 'total' , 'recipename', 'name')
+
+
+admin.site.register(Contact, ContactAdmin)
+admin.site.register(Comments, CommentsAdmin)
+admin.site.register(Rating, RatingAdmin)
+admin.site.register(Address, AddressAdmin)
 admin.site.register(Ingredients, admin.ModelAdmin)
 admin.site.register(FooterImage, FooterAdmin)
 admin.site.register(Feature, FeatureAdmin)
